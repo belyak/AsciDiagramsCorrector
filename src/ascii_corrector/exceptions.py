@@ -42,3 +42,11 @@ class ConfigurationError(AsciiCorrectorError):
 
 class DiagramIOError(AsciiCorrectorError):
     """Error reading or writing diagram files."""
+
+
+class MarkdownParseError(AsciiCorrectorError):
+    """Error parsing Markdown document structure."""
+
+
+class BackupError(AsciiCorrectorError):
+    """Error creating backup files."""

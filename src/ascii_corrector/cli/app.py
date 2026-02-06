@@ -5,7 +5,7 @@ from typing import Optional
 import typer
 
 from ascii_corrector import __version__
-from ascii_corrector.cli.commands import analyze, correct
+from ascii_corrector.cli.commands import analyze, correct, fix_md
 from ascii_corrector.config import Settings
 from ascii_corrector.logging import configure_logging
 
@@ -50,6 +50,7 @@ def main(
 # Register commands
 app.add_typer(correct.app, name="correct")
 app.add_typer(analyze.app, name="analyze")
+app.add_typer(fix_md.app, name="fix-md")
 
 
 if __name__ == "__main__":

@@ -1,144 +1,72 @@
-# ASCII Diagram Corrector
+# CLAUDE.md
 
-A Python CLI tool that uses algorithms to correct ASCII diagrams, focusing on parallel line alignment issues.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## Commands
 
-This tool corrects common issues in AI-generated ASCII diagrams:
-- Shifted/misaligned parallel lines
-- Missing or incorrect corner characters
-- Broken connections between boxes
-- Inconsistent line characters
+```bash
+# Install
+pip install -e ".[dev]"
+
+# Tests
+pytest                                    # All tests
+pytest tests/unit/domain/test_position.py -v  # Single file
+pytest -m unit                            # Unit only
+pytest -m integration                     # Integration only
+pytest -m e2e                             # E2E only
+pytest --cov=src --cov-fail-under=80      # With coverage
+
+# Lint & format
+ruff check src tests                      # Lint
+black src tests && isort src tests        # Format
+mypy src                                  # Type check
+pre-commit run --all-files                # All checks
+
+# CLI
+ascii-corrector correct input.txt -o output.txt
+ascii-corrector analyze input.txt
+ascii-corrector fix-md README.md --no-backup
+```
 
 ## Architecture
 
-```
-src/ascii_corrector/
-├── domain/          # Core business objects (Position, Character, Cell, Grid, Line, Diagram)
-├── detection/       # Line detection algorithms (CharacterClassifier, LineDetector, ParallelLineFinder)
-├── correction/      # Correction algorithms (AlignmentCalculator, ShiftCorrector, CorrectionEngine)
-├── io/              # Input/Output (DiagramReader, DiagramWriter)
-├── config/          # 12-factor configuration (Pydantic Settings)
-├── cli/             # Typer CLI commands (correct, analyze)
-└── logging/         # Structured logging (structlog)
-```
+Python 3.12 CLI tool using Typer. Corrects shifted/misaligned lines in ASCII diagrams.
 
-## Development Guidelines
+### Correction Pipeline
 
-### TDD (Test-Driven Development)
-1. **RED**: Write a failing test first
-2. **GREEN**: Write minimal code to pass
-3. **REFACTOR**: Improve while tests pass
+`CorrectionEngine` orchestrates: `LineDetector` → `ParallelLineFinder` → `AlignmentCalculator` → `ShiftCorrector`.
 
-```bash
-# Run specific test
-pytest tests/unit/domain/test_position.py -v
+1. **Detection**: Scan `Grid` for line characters (`-`, `|`, `=`, `+`, etc.), group consecutive chars into `Line` objects
+2. **Parallel Finding**: Group lines by direction, cluster by position within tolerance, check overlap
+3. **Alignment**: For each `ParallelGroup`, pick a reference line and compute `ShiftCorrection` offsets
+4. **Correction**: Apply shifts to a copied `Grid`, skip any that would go out of bounds
 
-# Run all tests
-pytest
+### Key Types
 
-# Run with coverage
-pytest --cov=src --cov-report=html
-```
+- **`Grid`** (`domain/grid.py`): Mutable 2D char matrix. `Grid.from_string(text)` / `grid.to_string()`. Central data structure.
+- **`Line`** (`domain/line.py`): List of `Cell`s with a `Direction`. Has `dominant_row()`/`dominant_col()` for alignment.
+- **`CorrectionResult`** (`correction/protocols.py`): Holds original grid, corrected grid, applied corrections, groups found.
+- **`ParallelGroup`** (`detection/protocols.py`): Group of lines that should be aligned.
 
-### OOP Design Principles
-- Use classes with single responsibility
-- Define protocols (interfaces) in `protocols.py` files
-- Prefer composition over inheritance
-- Use dataclasses for value objects (frozen=True for immutability)
+### Module Layout
 
-### 12-Factor App Compliance
-- **Config**: Use environment variables with `ASCII_CORR_` prefix
-- **Dependencies**: All declared in `pyproject.toml`
-- **Logs**: Use structlog, output to stdout in JSON format
-- **Processes**: Stateless CLI, no local file state
+- **`domain/`**: Value objects (`Position`, `Character`, `Cell`, `Grid`, `Line`). Character classification via frozensets in `character.py`.
+- **`detection/`**: `LineDetector` scans grid; `ParallelLineFinder` clusters lines.
+- **`correction/`**: `AlignmentCalculator` computes offsets; `ShiftCorrector` applies them; `CorrectionEngine` orchestrates.
+- **`io/`**: Markdown processing — `MarkdownParser` extracts fenced code blocks, `DiagramClassifier` identifies diagram content by language label + char ratio, `MarkdownCorrector` orchestrates per-block correction, `BackupManager` creates `.bak` files.
+- **`cli/commands/`**: Typer subcommands (`correct`, `analyze`, `fix-md`). Each file creates a `typer.Typer()` app registered in `cli/app.py`.
+- **`config/`**: Pydantic `Settings` with `ASCII_CORR_` env prefix.
+- **`logging/`**: structlog setup (JSON or console format).
 
-### Code Style (Strict PEP8)
-```bash
-# Format code
-black src tests
+### Protocols
 
-# Sort imports
-isort src tests
+Each layer defines `protocols.py` with `@runtime_checkable Protocol` classes as interfaces. Implementations are separate files.
 
-# Lint
-ruff check src tests
+## Development Conventions
 
-# Type check
-mypy src
-
-# Run all checks
-pre-commit run --all-files
-```
-
-## Common Commands
-
-```bash
-# Install in development mode
-pip install -e ".[dev]"
-
-# Install pre-commit hooks
-pre-commit install
-
-# Run the CLI
-ascii-corrector correct input.txt -o output.txt
-ascii-corrector analyze input.txt --verbose
-ascii-corrector correct input.txt --dry-run
-
-# Run tests
-pytest                                    # All tests
-pytest -m unit                            # Unit tests only
-pytest -m integration                     # Integration tests only
-pytest --cov=src --cov-fail-under=80     # With coverage check
-```
-
-## Testing with Claude Code
-
-Generate test diagrams using Claude Code CLI:
-
-```bash
-# Generate a broken diagram
-claude -p "Create an ASCII box diagram with intentionally shifted lines" > broken.txt
-
-# Correct it
-ascii-corrector correct broken.txt -o fixed.txt
-
-# Compare
-diff broken.txt fixed.txt
-```
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `ASCII_CORR_TOLERANCE` | Row/column tolerance for parallel detection | `1` |
-| `ASCII_CORR_MIN_LINE_LENGTH` | Minimum characters to consider a line | `2` |
-| `ASCII_CORR_LOG_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR) | `INFO` |
-| `ASCII_CORR_LOG_FORMAT` | Log format (json, console) | `json` |
-
-## Key Algorithms
-
-### Line Detection
-1. Scan grid for line characters (-, |, =, +)
-2. Group consecutive characters into line segments
-3. Classify lines by direction (horizontal/vertical)
-
-### Parallel Line Finding
-1. Group lines by direction
-2. Cluster by position using tolerance
-3. Check overlap to confirm parallelism
-
-### Shift Correction
-1. For each parallel group, find reference line
-2. Calculate offset for each misaligned line
-3. Validate no collisions
-4. Apply shifts, update grid
-
-## File Organization for New Features
-
-When adding a new feature:
-
-1. **Test first**: Create `tests/unit/<module>/test_<feature>.py`
-2. **Protocol**: Define interface in `<module>/protocols.py`
-3. **Implementation**: Create `<module>/<feature>.py`
-4. **Integration test**: Add to `tests/integration/`
+- **TDD**: Write failing test first, then implement, then refactor. Test file goes in `tests/unit/<module>/test_<feature>.py`.
+- **New feature pattern**: Test → Protocol in `protocols.py` → Implementation → Integration test.
+- **Dataclasses**: Use `frozen=True` for value objects, mutable for aggregates like `Grid`.
+- **Config**: All settings via `ASCII_CORR_` env vars or `.env` file. See `config/settings.py` for full list.
+- **CLI note**: Typer variadic arguments (`list[Path]`) require options to come **before** the file arguments (e.g., `fix-md --no-backup file.md`).
+- **Ruff exceptions**: `B008` and `ARG001` warnings on Typer commands are expected (Typer's API requires default function calls and `ctx` parameter).

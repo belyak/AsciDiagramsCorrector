@@ -68,6 +68,15 @@ def parallel_lines_shifted() -> str:
  ----"""
 
 
+# --- Markdown Path Fixtures ---
+
+
+@pytest.fixture
+def markdown_dir(fixtures_dir: Path) -> Path:
+    """Return path to markdown fixtures directory."""
+    return fixtures_dir / "markdown"
+
+
 # --- Temporary File Fixtures ---
 
 
@@ -76,6 +85,18 @@ def temp_diagram_file(tmp_path: Path):
     """Factory fixture to create temporary diagram files."""
 
     def _create(content: str, filename: str = "diagram.txt") -> Path:
+        file = tmp_path / filename
+        file.write_text(content)
+        return file
+
+    return _create
+
+
+@pytest.fixture
+def temp_markdown_file(tmp_path: Path):
+    """Factory fixture to create temporary Markdown files."""
+
+    def _create(content: str, filename: str = "document.md") -> Path:
         file = tmp_path / filename
         file.write_text(content)
         return file

@@ -67,3 +67,19 @@ class Settings(BaseSettings):
         default="utf-8",
         description="Default file encoding",
     )
+
+    # Markdown settings
+    diagram_languages: list[str] = Field(
+        default=["", "ascii", "text", "diagram", "art"],
+        description="Code block language labels treated as potential diagrams",
+    )
+    min_diagram_char_ratio: float = Field(
+        default=0.05,
+        ge=0.0,
+        le=1.0,
+        description="Minimum ratio of line-drawing characters to classify as diagram",
+    )
+    backup_suffix: str = Field(
+        default=".bak",
+        description="Suffix for backup files",
+    )
