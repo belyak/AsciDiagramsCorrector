@@ -41,6 +41,8 @@ Python 3.12 CLI tool using Typer. Corrects shifted/misaligned lines in ASCII dia
 3. **Alignment**: For each `ParallelGroup`, pick a reference line and compute `ShiftCorrection` offsets
 4. **Correction**: Apply shifts to a copied `Grid`, skip any that would go out of bounds
 
+**Correction scope**: The engine aligns lines that are the same direction, within `tolerance` rows/columns of each other, AND have overlapping column/row ranges. It does NOT fix box structures where top/bottom are far apart — those form separate groups. Tree-branch notation (`+--`) can be misidentified as horizontal line segments.
+
 ### Key Types
 
 - **`Grid`** (`domain/grid.py`): Mutable 2D char matrix. `Grid.from_string(text)` / `grid.to_string()`. Central data structure.
