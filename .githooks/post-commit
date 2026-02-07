@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo "==> post-commit: Running obfuscation"
+bash "$(git rev-parse --show-toplevel)/scripts/obfuscate.sh"

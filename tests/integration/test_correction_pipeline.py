@@ -211,6 +211,50 @@ class TestCorrectionPipelineParallelLines:
         assert len(v_groups) > 0
 
 
+class TestCorrectionPipelineStrayCharacters:
+    """Tests for stray character detection in the full pipeline."""
+
+    def test_box_with_shifted_vertical_edge(self) -> None:
+        """Full pipeline should correct a shifted vertical edge in a box."""
+        broken = (
+            "+--+\n"
+            "|  |\n"
+            "|  |\n"
+            " | |\n"
+            "|  |\n"
+            "|  |\n"
+            "+--+"
+        )
+        grid = Grid.from_string(broken)
+        engine = CorrectionEngine(tolerance=1)
+
+        result = engine.correct(grid)
+
+        corrected_lines = result.corrected_grid.to_string().split("\n")
+        # The shifted | on row 3 should now be at col 0
+        assert corrected_lines[3].startswith("|")
+
+    def test_architecture_md_style_whitespace_row(self) -> None:
+        """Should correct shifted | on whitespace-only rows in box structures."""
+        broken = (
+            "+--------+  +--------+\n"
+            "|        |  |        |\n"
+            "|        |  |        |\n"
+            " |       |  |        |\n"
+            "|        |  |        |\n"
+            "|        |  |        |\n"
+            "+--------+  +--------+"
+        )
+        grid = Grid.from_string(broken)
+        engine = CorrectionEngine(tolerance=1)
+
+        result = engine.correct(grid)
+
+        corrected_lines = result.corrected_grid.to_string().split("\n")
+        # Row 3 should start with | at col 0
+        assert corrected_lines[3][0] == "|"
+
+
 class TestCorrectionPipelineToleranceSettings:
     """Tests for tolerance configuration."""
 

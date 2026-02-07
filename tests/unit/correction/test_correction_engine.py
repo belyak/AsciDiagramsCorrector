@@ -116,3 +116,22 @@ class TestCorrectionEngineConfiguration:
         engine = CorrectionEngine(min_line_length=3)
 
         assert engine._min_line_length == 3
+
+
+class TestCorrectionEngineStrayCharacters:
+    """Tests for stray character correction in CorrectionEngine."""
+
+    def test_correct_shifted_pipe_in_box(self) -> None:
+        """Should correct a shifted | in a box structure."""
+        # Taller box: left side has enough pipes for detection despite one shifted
+        broken = "+--+\n|  |\n|  |\n | |\n|  |\n|  |\n+--+"
+        grid = Grid.from_string(broken)
+        engine = CorrectionEngine(tolerance=1)
+
+        result = engine.correct(grid)
+
+        corrected = result.corrected_grid.to_string()
+        lines = corrected.split("\n")
+        # Row 3 should now have | at col 0 instead of col 1
+        assert lines[3][0] == "|"
+        assert result.corrections_count >= 1

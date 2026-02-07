@@ -64,6 +64,28 @@ class ShiftCorrectorProtocol(Protocol):
 
 
 @runtime_checkable
+class StrayCharacterFinderProtocol(Protocol):
+    """Protocol for finding stray line characters not part of detected lines."""
+
+    def find_stray_corrections(
+        self, grid: Grid, detected_lines: list[Line]
+    ) -> list[ShiftCorrection]:
+        """Find corrections for stray characters near detected lines."""
+        ...
+
+
+@runtime_checkable
+class RowShiftCorrectorProtocol(Protocol):
+    """Protocol for detecting and correcting whole-row shifts."""
+
+    def find_row_shift_corrections(
+        self, grid: Grid
+    ) -> list[ShiftCorrection]:
+        """Find corrections for rows shifted by a consistent column offset."""
+        ...
+
+
+@runtime_checkable
 class CorrectionEngineProtocol(Protocol):
     """Protocol for the main correction orchestrator."""
 

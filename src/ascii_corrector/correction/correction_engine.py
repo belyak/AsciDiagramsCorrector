@@ -2,7 +2,9 @@
 
 from ascii_corrector.correction.alignment_calculator import AlignmentCalculator
 from ascii_corrector.correction.protocols import CorrectionResult, ShiftCorrection
+from ascii_corrector.correction.row_shift_corrector import RowShiftCorrector
 from ascii_corrector.correction.shift_corrector import ShiftCorrector
+from ascii_corrector.correction.stray_character_finder import StrayCharacterFinder
 from ascii_corrector.detection import LineDetector, ParallelGroup, ParallelLineFinder
 from ascii_corrector.domain import Grid
 
@@ -41,6 +43,8 @@ class CorrectionEngine:
         )
         self._alignment_calculator = AlignmentCalculator()
         self._shift_corrector = ShiftCorrector()
+        self._stray_finder = StrayCharacterFinder(tolerance=tolerance)
+        self._row_shift_corrector = RowShiftCorrector(tolerance=tolerance)
 
     def correct(self, grid: Grid) -> CorrectionResult:
         """
@@ -77,6 +81,16 @@ class CorrectionEngine:
         for group in groups:
             alignment_result = self._alignment_calculator.calculate_alignment(group)
             all_corrections.extend(alignment_result.corrections)
+
+        # Find stray character corrections
+        stray_corrections = self._stray_finder.find_stray_corrections(grid, lines)
+        all_corrections.extend(stray_corrections)
+
+        # Find whole-row shift corrections (column consensus)
+        row_shift_corrections = self._row_shift_corrector.find_row_shift_corrections(
+            grid
+        )
+        all_corrections.extend(row_shift_corrections)
 
         # Apply corrections
         corrected_grid = grid.copy()
@@ -128,6 +142,16 @@ class CorrectionEngine:
         for group in groups:
             alignment_result = self._alignment_calculator.calculate_alignment(group)
             all_corrections.extend(alignment_result.corrections)
+
+        # Find stray character corrections
+        stray_corrections = self._stray_finder.find_stray_corrections(grid, lines)
+        all_corrections.extend(stray_corrections)
+
+        # Find whole-row shift corrections (column consensus)
+        row_shift_corrections = self._row_shift_corrector.find_row_shift_corrections(
+            grid
+        )
+        all_corrections.extend(row_shift_corrections)
 
         return CorrectionResult(
             original_grid=grid,

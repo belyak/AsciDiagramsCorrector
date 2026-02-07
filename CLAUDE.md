@@ -34,12 +34,14 @@ Python 3.12 CLI tool using Typer. Corrects shifted/misaligned lines in ASCII dia
 
 ### Correction Pipeline
 
-`CorrectionEngine` orchestrates: `LineDetector` → `ParallelLineFinder` → `AlignmentCalculator` → `ShiftCorrector`.
+`CorrectionEngine` orchestrates: `LineDetector` → `ParallelLineFinder` → `AlignmentCalculator` → `StrayCharacterFinder` → `RowShiftCorrector` → `ShiftCorrector`.
 
 1. **Detection**: Scan `Grid` for line characters (`-`, `|`, `=`, `+`, etc.), group consecutive chars into `Line` objects
 2. **Parallel Finding**: Group lines by direction, cluster by position within tolerance, check overlap
 3. **Alignment**: For each `ParallelGroup`, pick a reference line and compute `ShiftCorrection` offsets
-4. **Correction**: Apply shifts to a copied `Grid`, skip any that would go out of bounds
+4. **Stray Character Finding**: Find individual line chars (`|`, `!`, `-`, `=`, `_`) not part of any detected line and produce corrections to snap them to the nearest detected line of matching direction. Skips strays on rows/columns containing text to avoid breaking formatting (exception: right-edge pipes).
+5. **Row Shift Detection**: Use column consensus — build a histogram of structural chars (`|`, `+`, `!`) per column, then detect rows where all structural chars are offset from a more-popular nearby column. Produces whole-row shift corrections.
+6. **Correction**: Apply all `ShiftCorrection`s to a copied `Grid`, skip any that would go out of bounds
 
 **Correction scope**: The engine aligns lines that are the same direction, within `tolerance` rows/columns of each other, AND have overlapping column/row ranges. It does NOT fix box structures where top/bottom are far apart — those form separate groups. Tree-branch notation (`+--`) can be misidentified as horizontal line segments.
 
@@ -54,7 +56,7 @@ Python 3.12 CLI tool using Typer. Corrects shifted/misaligned lines in ASCII dia
 
 - **`domain/`**: Value objects (`Position`, `Character`, `Cell`, `Grid`, `Line`). Character classification via frozensets in `character.py`.
 - **`detection/`**: `LineDetector` scans grid; `ParallelLineFinder` clusters lines.
-- **`correction/`**: `AlignmentCalculator` computes offsets; `ShiftCorrector` applies them; `CorrectionEngine` orchestrates.
+- **`correction/`**: `AlignmentCalculator` computes offsets; `StrayCharacterFinder` snaps orphan chars to nearby lines; `RowShiftCorrector` fixes whole-row horizontal shifts via column consensus; `ShiftCorrector` applies all corrections; `CorrectionEngine` orchestrates.
 - **`io/`**: Markdown processing — `MarkdownParser` extracts fenced code blocks, `DiagramClassifier` identifies diagram content by language label + char ratio, `MarkdownCorrector` orchestrates per-block correction, `BackupManager` creates `.bak` files.
 - **`cli/commands/`**: Typer subcommands (`correct`, `analyze`, `fix-md`). Each file creates a `typer.Typer()` app registered in `cli/app.py`.
 - **`config/`**: Pydantic `Settings` with `ASCII_CORR_` env prefix.

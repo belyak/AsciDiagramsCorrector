@@ -212,3 +212,92 @@ class TestLineDetectorPositions:
         assert line.start_position().row == 0
         assert line.end_position().row == 2
         assert line.dominant_col() == 2
+
+
+class TestLineDetectorBridging:
+    """Tests for + bridging behavior in line detection."""
+
+    def test_vertical_line_bridges_through_plus(self) -> None:
+        """Vertical line should bridge through + corners."""
+        grid = Grid.from_string("+\n|\n|\n+")
+        detector = LineDetector(min_line_length=2)
+
+        lines = detector.detect_lines(grid)
+
+        vertical = [ln for ln in lines if ln.direction == Direction.VERTICAL]
+        assert len(vertical) == 1
+        assert vertical[0].length() == 2  # Only | cells, not +
+
+    def test_vertical_bridge_single_pipe_between_corners(self) -> None:
+        """Single pipe between corners should be detected with min_line_length=1."""
+        grid = Grid.from_string("+\n|\n+")
+        detector = LineDetector(min_line_length=1)
+
+        lines = detector.detect_lines(grid)
+
+        vertical = [ln for ln in lines if ln.direction == Direction.VERTICAL]
+        assert len(vertical) == 1
+        assert vertical[0].length() == 1
+
+    def test_bridge_does_not_include_plus_in_cells(self) -> None:
+        """Bridging through + should not include + in line cells."""
+        grid = Grid.from_string("+\n|\n|\n+\n|\n|\n+")
+        detector = LineDetector(min_line_length=2)
+
+        lines = detector.detect_lines(grid)
+
+        vertical = [ln for ln in lines if ln.direction == Direction.VERTICAL]
+        assert len(vertical) == 1
+        assert vertical[0].length() == 4  # 4 pipe cells
+        for cell in vertical[0].cells:
+            assert cell.character.value == "|"
+
+    def test_horizontal_line_bridges_through_plus(self) -> None:
+        """Horizontal line should bridge through + corners."""
+        grid = Grid.from_string("+--+--+")
+        detector = LineDetector(min_line_length=2)
+
+        lines = detector.detect_lines(grid)
+
+        horizontal = [ln for ln in lines if ln.direction == Direction.HORIZONTAL]
+        assert len(horizontal) == 1
+        assert horizontal[0].length() == 4  # Only - cells
+        for cell in horizontal[0].cells:
+            assert cell.character.value == "-"
+
+    def test_no_bridge_when_only_corners(self) -> None:
+        """Column of only + chars should not produce vertical lines."""
+        grid = Grid.from_string("+\n+\n+")
+        detector = LineDetector(min_line_length=1)
+
+        lines = detector.detect_lines(grid)
+
+        vertical = [ln for ln in lines if ln.direction == Direction.VERTICAL]
+        assert len(vertical) == 0
+
+    def test_bridge_stops_at_space(self) -> None:
+        """Bridge should not span across a space."""
+        grid = Grid.from_string("|\n+\n \n|")
+        detector = LineDetector(min_line_length=1)
+
+        lines = detector.detect_lines(grid)
+
+        vertical = [ln for ln in lines if ln.direction == Direction.VERTICAL]
+        # Each | is isolated: first | has + below but space after, second | is alone
+        # With bridging, first segment is |,+ but + has space after -> line is just |
+        # Second | is alone -> line of length 1
+        assert len(vertical) == 2
+        assert all(v.length() == 1 for v in vertical)
+
+    def test_existing_box_detection_unchanged(self) -> None:
+        """Box detection should still work correctly with bridging."""
+        grid = Grid.from_string("+---+\n|   |\n|   |\n+---+")
+        detector = LineDetector()
+
+        lines = detector.detect_lines(grid)
+
+        horizontal = [ln for ln in lines if ln.direction == Direction.HORIZONTAL]
+        vertical = [ln for ln in lines if ln.direction == Direction.VERTICAL]
+
+        assert len(horizontal) == 2  # top and bottom
+        assert len(vertical) == 2  # left and right
