@@ -69,18 +69,18 @@ Value objects use `frozen=True` dataclasses. `Grid` is the only mutable aggregat
  +------------------+               |
         ^                           |
         | char_class                |
- +------+----------+               |
- | Character       |               |
- | (frozen)        |               |
- |                 |               |
- | value: str      |               |
- | is_line_char()  |               |
- | is_corner()     |               |
- | is_junction()   |               |
- +--------+--------+               |
-          |                        |
+ +------+----------+                |
+ | Character       |                |
+ | (frozen)        |                |
+ |                 |                |
+ | value: str      |                |
+ | is_line_char()  |                |
+ | is_corner()     |                |
+ | is_junction()   |                |
+ +--------+--------+                |
+          |                         |
           v  has-a                  v  has-a
- +--------+--------+    +---------+--------+
+ +--------+--------+    +-----------+------+
  |     Cell        |    |      Line        |
  |   (frozen)      |    |   (mutable)      |
  |                 |    |                  |
@@ -115,7 +115,7 @@ Value objects use `frozen=True` dataclasses. `Grid` is the only mutable aggregat
  | offset()         |
  | distance_to()    |
  | manhattan_dist() |
-  +------------------+
+ +------------------+
 ```
 
 ## 4. Exception Hierarchy
@@ -141,7 +141,7 @@ Custom exceptions with contextual metadata.
          |
          +-- ConfigurationError
          |
-          +-- DiagramIOError
+         +-- DiagramIOError
          |
          +-- MarkdownParseError
          |
@@ -159,20 +159,20 @@ Typer app with three registered subcommands.
        |
        +--[ correct ]------+---> Reads file
        |   -o, -i, -n, -t  |     Grid.from_string()
-       |                    |     CorrectionEngine.correct()
-       |                    +---> Writes to file/stdout
+       |                   |     CorrectionEngine.correct()
+       |                   +---> Writes to file/stdout
        |
        +--[ analyze ]------+---> Reads file
        |   -l, -p, -t      |     Grid.from_string()
-       |   --issues         |     CorrectionEngine.analyze()
-       |                    +---> Prints report
+       |   --issues        |     CorrectionEngine.analyze()
+       |                   +---> Prints report
        |
        +--[ fix-md ]-------+---> Reads .md files
-           --no-backup      |     MarkdownParser.parse()
-            -n, -t           |     DiagramClassifier.is_diagram()
-                            |     CorrectionEngine.correct() per block
-                            |     BackupManager.create_backup()
-                            +---> Writes corrected .md in-place
+           --no-backup     |     MarkdownParser.parse()
+           -n, -t          |     DiagramClassifier.is_diagram()
+                           |     CorrectionEngine.correct() per block
+                           |     BackupManager.create_backup()
+                           +---> Writes corrected .md in-place
 ```
 
 ## 6. Markdown Correction Flow
@@ -182,10 +182,10 @@ The `fix-md` command processes Markdown files containing embedded diagrams.
 ```
  +------------------+     +-------------------+     +-------------------+
  | Input .md file   |---->| MarkdownParser    |---->| DiagramClassifier |
-  |                  |     |                   |     |                   |
+ |                  |     |                   |     |                   |
  | # Title          |     | parse(text)       |     | is_diagram()      |
  | ```              |     | -> MarkdownDoc    |     | language check    |
- | +--+             |     |    with CodeBlocks |     | + char ratio      |
+ | +--+             |     |   with CodeBlocks |     | + char ratio      |
  | |  |             |     |                   |     |                   |
  | +--+             |     +-------------------+     +---------+---------+
  | ```              |                                         |
@@ -219,13 +219,13 @@ How `LineDetector` scans a grid, row by row and column by column.
   Result:                                    Col 5: +    detected: "|"
   Line(cells=[...], dir=HORIZONTAL)                 |    (vertical)
   at rows 0 and 3                                   |
-                                                     +
+                                                    +
 
   Then ParallelLineFinder groups:
   +----------------------------------------------+
   | ParallelGroup                                |
   | direction: HORIZONTAL                        |
-   | lines: [line_row0, line_row3]                |
+  | lines: [line_row0, line_row3]                |
   | reference: line_row0 (longest)               |
   | expected_position: row 0                     |
   +----------------------------------------------+
@@ -243,7 +243,7 @@ The data types flowing through the correction pipeline.
  | col_offset: int   |          | reference_pos: int  |         | corrections_applied |
  | confidence: float |          +---------------------+         | groups_found        |
  +-------------------+                                          | corrections_count   |
-                                                                 +---------------------+
+                                                                +---------------------+
 ```
 
 ## 9. Protocol Layer
@@ -260,7 +260,7 @@ Each processing layer defines protocols as structural interfaces.
   | LineDetectorProto         |     |                           |
   | detect_lines(grid)        |     | ShiftCorrectorProto       |
   |   -> list[Line]           |     | apply_correction(corr,    |
-   |                           |     |   grid) -> Grid           |
+  |                           |     |   grid) -> Grid           |
   | ParallelFinderProto       |     |                           |
   | find_parallel_groups(     |     | CorrectionEngineProto     |
   |   lines) -> list[Group]   |     | correct(grid)             |
@@ -275,7 +275,7 @@ All settings follow 12-factor principles with environment variable overrides.
 ```
  +--------------------------------------------------------------+
  | Settings (pydantic BaseSettings)                             |
- | env_prefix = "ASCII_CORR_"                                  |
+ | env_prefix = "ASCII_CORR_"                                   |
  |--------------------------------------------------------------|
  | Detection       | Correction     | Logging    | I/O          |
  |-----------------|----------------|------------|--------------|
@@ -286,8 +286,8 @@ All settings follow 12-factor principles with environment variable overrides.
  |-----------------|----------------|------------|--------------|
  | Markdown                                                     |
  |--------------------------------------------------------------|
- | diagram_languages: ["", "ascii", "text", "diagram", "art"]  |
- | min_diagram_char_ratio: 0.05                                  |
+ | diagram_languages: ["", "ascii", "text", "diagram", "art"]   |
+ | min_diagram_char_ratio: 0.05                                 |
  | backup_suffix: ".bak"                                        |
  +--------------------------------------------------------------+
 ```
