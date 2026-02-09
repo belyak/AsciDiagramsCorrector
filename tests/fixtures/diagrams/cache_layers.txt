@@ -1,0 +1,38 @@
+┌─────────────────────────────────────────┐
+│          Client Requests                 │
+└────────────────┬────────────────────────┘
+                 │
+          ┌──────▼──────┐
+          │ L1 Cache    │
+          │ (Local      │
+          │  Memory)    │
+          └──────┬──────┘
+                 │ MISS
+          ┌──────▼──────┐
+          │ L2 Cache    │
+          │ (Redis)     │
+          ├─────────────┤
+          │ TTL: 1 hour │
+          └──────┬──────┘
+                 │ MISS
+          ┌──────▼──────┐
+          │ L3 Cache    │
+          │ (CDN)       │
+          ├─────────────┤
+          │ TTL: 1 day  │
+          └──────┬──────┘
+                 │ MISS
+          ┌──────▼──────┐
+          │ Database    │
+          │ (Primary)   │
+          ├─────────────┤
+          │ Read Replicas
+          │ (Async)     │
+          └─────────────┘
+
+    Cache Invalidation Strategy:
+    ┌──────────────────────────┐
+    │ • Event-based triggers   │
+    │ • TTL expiration         │
+    │ • Manual purge on update │
+    └──────────────────────────┘

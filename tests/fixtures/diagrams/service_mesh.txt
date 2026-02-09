@@ -1,0 +1,43 @@
+┌────────────────────────────────────────────────────┐
+│       Kubernetes Cluster + Service Mesh            │
+└────────────────────────────────────────────────────┘
+
+         ┌───────────────────────────┐
+         │  Istio Control Plane      │
+         │  • Pilot (config mgmt)    │
+         │  • Citadel (security)     │
+         │  • Mixer (telemetry)      │
+         └───────────────┬───────────┘
+                         │
+        ┌────────────────┼────────────────┐
+        │                │                │
+    ┌───▼──────┐    ┌────▼────┐    ┌────▼────┐
+    │ Service-A│    │ Service-B
+    │          │    │          │    │ Service-C
+    └───┬──────┘    └────┬─────┘    └────┬────┘
+        │                │              │
+    ┌───▼──────┐    ┌────▼────┐    ┌────▼────┐
+    │Envoy     │    │ Envoy   │    │ Envoy   │
+    │Sidecar   │    │ Sidecar │    │ Sidecar │
+    │Proxy     │    │ Proxy   │    │ Proxy   │
+    └───┬──────┘    └────┬─────┘    └────┬────┘
+        │                │              │
+        └────────────────┼──────────────┘
+                         │
+    ┌────────────────────▼─────────────────────┐
+    │  Data Plane (Envoy Proxies)              │
+    │  • Connection Pooling                    │
+    │  • Load Balancing                        │
+    │  • Circuit Breaking                      │
+    │  • Retries & Timeouts                    │
+    │  • Distributed Tracing                   │
+    └──────────────────────────────────────────┘
+
+╔════════════════════════════════════════╗
+║ VirtualService Configuration           ║
+╠════════════════════════════════════════╣
+║ • Routing rules                        ║
+║ • Traffic policies                     ║
+║ • Failover strategies                  ║
+║ • Rate limiting                        ║
+╚════════════════════════════════════════╝

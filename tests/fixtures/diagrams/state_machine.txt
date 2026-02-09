@@ -1,0 +1,62 @@
+┌────────────────────────────────────────────────────┐
+│       Order Processing State Machine               │
+└────────────────────────────────────────────────────┘
+
+                      START
+                        │
+                        ▼
+            ┌──────────────────────┐
+            │  PENDING             │
+            │  (Order received)    │
+            └──────────┬───────────┘
+                       │
+         ┌─────────────┼─────────────┐
+         │             │             │
+    confirmed       timeout      cancel
+         │             │             │
+         ▼             ▼             ▼
+    ┌─────────┐ ┌──────────┐ ┌─────────┐
+    │ APPROVED│ │ EXPIRED  │ │CANCELLED│
+    └────┬────┘ └─────┬────┘ └────┬────┘
+         │           │            │
+    payment_       no_retry     │
+    completed         │            │
+         │           ▼            │
+         │      ┌──────────┐     │
+         │      │  FAILED  │     │
+         │      └──────────┘     │
+         │                        │
+         ▼                        │
+    ┌─────────────┐              │
+    │ PROCESSING  │              │
+    │ (In Warehouse)
+    └────┬────────┘              │
+         │                        │
+    packed                        │
+         │                        │
+         ▼                        │
+    ┌─────────────┐              │
+    │ SHIPPED     │              │
+    │ (In Transit)               │
+    └────┬────────┘              │
+         │                        │
+    delivered                     │
+         │                        │
+         ▼                        │
+    ┌─────────────┐              │
+    │ DELIVERED   │              │
+    └────┬────────┘              │
+         │                        │
+         │                        │
+         └────────────┬───────────┘
+                      │
+                      ▼
+                    END
+
+═════════════════════════════════════════════
+  Transition Rules:
+  • PENDING → APPROVED (valid payment)
+  • APPROVED → PROCESSING (inventory check)
+  • PROCESSING → SHIPPED (tracking assigned)
+  • Any State → CANCELLED (user request)
+═════════════════════════════════════════════

@@ -1,0 +1,45 @@
+┌─────────────────────────────────────────────────────┐
+│            User Login Flow                           │
+└─────────────────────────────────────────────────────┘
+
+  ┌──────────────┐                ┌─────────────────┐
+  │   User App   │                │  Auth Server    │
+  │  Client      │                │  (OAuth2)       │
+  └──────┬───────┘                └────────┬────────┘
+         │ 1. Login Request               │
+         │───────────────────────────────>│
+         │                                │
+         │ 2. Redirect to IdP             │
+         │<──────────────────────────────│
+         │                                │
+    ┌────▼─────────────┐                │
+    │  3. User enters  │                │
+    │  credentials     │                │
+    └────┬─────────────┘                │
+         │ 4. Credentials               │
+         │ POST IdP                     │
+         ├───────────────────────────────>
+         │                          ┌────▼──────────┐
+         │                          │ IdP (Azure AD)│
+         │                          │ Validates     │
+         │                          └────┬──────────┘
+         │<─────────────────────────────│
+         │ 5. Auth Code                 │
+         │                                │
+         │ 6. Exchange for Token          │
+         │────────────────────────────────>
+         │                                │
+         │<────────────────────────────────
+         │ 7. Access Token + Refresh Token
+         │                                │
+  ┌──────▼──────────────┐                │
+  │ 8. Store tokens     │                │
+  │ (localStorage/       │                │
+  │  secure storage)    │                │
+  └────────────────────┘                │
+
+═════════════════════════════════════════════════════
+  Token Refresh Mechanism:
+  • Access Token lifetime: 1 hour
+  • Refresh Token lifetime: 30 days
+  • Automatic refresh before expiry

@@ -1,0 +1,49 @@
+┌────────────────────────────────────────────────────┐
+│      Serverless Application Architecture           │
+└────────────────────────────────────────────────────┘
+
+          ┌─────────────────────────────┐
+          │  API Gateway               │
+          │  (Endpoint: /api/*)        │
+          └────────────────┬────────────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+    ┌───▼──────┐      ┌────▼─────┐     ┌────▼────┐
+    │ Lambda   │      │ Lambda   │     │ Lambda  │
+    │ (User    │      │(Orders   │     │(Payments
+    │Auth)     │      │Service)  │     │Service) │
+    ├──────────┤      ├──────────┤     ├─────────┤
+    │ Runtime: │      │Runtime:  │     │Runtime: │
+    │ Node.js  │      │ Python   │     │ Go      │
+    │ Timeout: │      │Timeout:  │     │Timeout: │
+    │ 30s      │      │ 60s      │     │ 45s     │
+    └────┬─────┘      └────┬─────┘     └────┬────┘
+         │                 │               │
+         └─────────────────┼───────────────┘
+                           │
+        ┌──────────────────┼────────────────────┐
+        │                  │                    │
+    ┌───▼──────┐      ┌────▼──────┐     ┌──────▼────┐
+    │ DynamoDB │      │ S3 Bucket │     │ CloudWatch
+    │(NoSQL DB)│      │(Files)    │     │(Logs)      │
+    └──────────┘      └───────────┘     └────────────┘
+         │
+    ┌────▼──────────────────┐
+    │ Event Sources         │
+    ├───────────────────────┤
+    │ • S3 Events           │
+    │ • SNS Topics          │
+    │ • SQS Queues         │
+    │ • CloudWatch Events   │
+    │ • API Gateway        │
+    │ • Scheduled Events    │
+    └───────────────────────┘
+
+    ┌──────────────────────────────────┐
+    │ Auto-Scaling Configuration       │
+    │ • Min instances: 0 (cold start)  │
+    │ • Max instances: unlimited       │
+    │ • Concurrent executions: 1000    │
+    │ • Memory: 128-10,240 MB          │
+    └──────────────────────────────────┘
