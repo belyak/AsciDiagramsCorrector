@@ -2,15 +2,7 @@
 
 from ascii_corrector.correction.protocols import ShiftCorrection
 from ascii_corrector.domain import Cell, Direction, Grid, Line, Position
-
-# Characters that should be matched as stray vertical chars
-_VERTICAL_CHARS: frozenset[str] = frozenset({"|", "!"})
-# Characters that should be matched as stray horizontal chars
-_HORIZONTAL_CHARS: frozenset[str] = frozenset({"-", "=", "_"})
-# Pipe-like chars that act as row boundaries for vertical stray scanning
-_VERTICAL_BOUNDARY: frozenset[str] = frozenset({"|", "!"})
-# Line chars that act as column boundaries for horizontal stray scanning
-_HORIZONTAL_BOUNDARY: frozenset[str] = frozenset({"-", "=", "_"})
+from ascii_corrector.domain.character_constants import CORNER_CHARS, HORIZONTAL_CHARS, VERTICAL_CHARS
 
 
 class StrayCharacterFinder:
@@ -68,13 +60,13 @@ class StrayCharacterFinder:
 
                 char_value = cell.character.value
 
-                if char_value in _VERTICAL_CHARS:
+                if char_value in VERTICAL_CHARS:
                     corr = self._find_vertical_correction(
                         cell, vertical_lines, grid
                     )
                     if corr is not None:
                         corrections.append(corr)
-                elif char_value in _HORIZONTAL_CHARS:
+                elif char_value in HORIZONTAL_CHARS:
                     corr = self._find_horizontal_correction(
                         cell, horizontal_lines, grid
                     )
@@ -97,7 +89,7 @@ class StrayCharacterFinder:
             if cell is None:
                 continue
             v = cell.character.value
-            if v != " " and v not in _VERTICAL_BOUNDARY:
+            if v != " " and v not in VERTICAL_CHARS:
                 return True
         return False
 
@@ -111,16 +103,16 @@ class StrayCharacterFinder:
             if cell is None:
                 continue
             v = cell.character.value
-            if v != " " and v not in _HORIZONTAL_BOUNDARY:
+            if v != " " and v not in HORIZONTAL_CHARS:
                 return True
         return False
 
     @staticmethod
     def _has_adjacent_structural(grid: Grid, row: int, col: int) -> bool:
-        """Return True if a structural char (``|``, ``+``, ``!``) exists
+        """Return True if a structural char (vertical or corner) exists
         at (row-1, col) or (row+1, col).
         """
-        structural = frozenset({"|", "+", "!"})
+        structural = VERTICAL_CHARS | CORNER_CHARS
         for adj_row in [row - 1, row + 1]:
             cell = grid.get_cell(Position(row=adj_row, col=col))
             if cell is not None and cell.character.value in structural:

@@ -30,7 +30,7 @@ class TestCorrectCommandBasic:
         output_file = tmp_path / "output.txt"
 
         result = runner.invoke(
-            app, ["correct", str(input_file), "-o", str(output_file)]
+            app, ["correct", "-o", str(output_file), str(input_file)]
         )
 
         assert result.exit_code == 0
@@ -42,7 +42,7 @@ class TestCorrectCommandBasic:
         content = "+--+\n|  |\n+--+"
         input_file = temp_diagram_file(content)
 
-        result = runner.invoke(app, ["correct", str(input_file), "--in-place"])
+        result = runner.invoke(app, ["correct", "--in-place", str(input_file)])
 
         assert result.exit_code == 0
         # File should be modified
@@ -70,7 +70,7 @@ class TestCorrectCommandDryRun:
         content = "+----+\n|    |\n +---+"
         input_file = temp_diagram_file(content)
 
-        result = runner.invoke(app, ["correct", str(input_file), "--dry-run"])
+        result = runner.invoke(app, ["correct", "--dry-run", str(input_file)])
 
         assert result.exit_code == 0
         assert "Dry run mode" in result.stdout
@@ -81,7 +81,7 @@ class TestCorrectCommandDryRun:
         original_content = "+----+\n|    |\n +---+"
         input_file = temp_diagram_file(original_content)
 
-        runner.invoke(app, ["correct", str(input_file), "--dry-run"])
+        runner.invoke(app, ["correct", "--dry-run", str(input_file)])
 
         # File should be unchanged
         assert input_file.read_text() == original_content
@@ -96,7 +96,7 @@ class TestCorrectCommandTolerance:
         input_file = temp_diagram_file(content)
 
         result = runner.invoke(
-            app, ["correct", str(input_file), "--tolerance", "2"]
+            app, ["correct", "--tolerance", "2", str(input_file)]
         )
 
         assert result.exit_code == 0
@@ -106,7 +106,7 @@ class TestCorrectCommandTolerance:
         content = "+--+\n|  |\n+--+"
         input_file = temp_diagram_file(content)
 
-        result = runner.invoke(app, ["correct", str(input_file), "-t", "2"])
+        result = runner.invoke(app, ["correct", "-t", "2", str(input_file)])
 
         assert result.exit_code == 0
 

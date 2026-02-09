@@ -6,10 +6,12 @@ from enum import Enum, auto
 class CharacterClass(Enum):
     """Classification of ASCII characters for diagram parsing."""
 
-    HORIZONTAL = auto()  # -, =, _
-    VERTICAL = auto()  # |, !
-    CORNER = auto()  # +, ., ', `
-    JUNCTION = auto()  # +, *
+    HORIZONTAL = auto()  # -, =, _, ─, ━, ═
+    VERTICAL = auto()  # |, !, │, ┃, ║
+    CORNER = auto()  # +, ., ', `, ┌, ┐, └, ┘, ╔, ╗, ╚, ╝, etc
+    JUNCTION = auto()  # *, ┼, ├, ┤, ┬, ┴, ╋
+    DIAGONAL_DOWN = auto()  # \, ╲
+    DIAGONAL_UP = auto()  # /, ╱
     ARROW = auto()  # <, >, ^, v, V
     TEXT = auto()  # alphanumeric
     WHITESPACE = auto()  # space, tab

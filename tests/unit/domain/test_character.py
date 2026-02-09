@@ -174,3 +174,109 @@ class TestCharacterWhitespaceChecks:
         char = Character(value=value)
 
         assert char.is_whitespace() is False
+
+
+class TestUnicodeHorizontalCharacters:
+    """Tests for Unicode horizontal line character classification."""
+
+    @pytest.mark.parametrize("value", ["─", "━", "═"])
+    def test_unicode_horizontal_characters_classified_as_horizontal(self, value: str) -> None:
+        """Unicode horizontal characters should be classified as HORIZONTAL."""
+        char = Character(value=value)
+
+        assert char.char_class == CharacterClass.HORIZONTAL
+
+    @pytest.mark.parametrize("value", ["─", "━", "═"])
+    def test_unicode_horizontal_is_line_char(self, value: str) -> None:
+        """Unicode horizontal characters should be recognized as line chars."""
+        char = Character(value=value)
+
+        assert char.is_line_char() is True
+
+
+class TestUnicodeVerticalCharacters:
+    """Tests for Unicode vertical line character classification."""
+
+    @pytest.mark.parametrize("value", ["│", "┃", "║"])
+    def test_unicode_vertical_characters_classified_as_vertical(self, value: str) -> None:
+        """Unicode vertical characters should be classified as VERTICAL."""
+        char = Character(value=value)
+
+        assert char.char_class == CharacterClass.VERTICAL
+
+    @pytest.mark.parametrize("value", ["│", "┃", "║"])
+    def test_unicode_vertical_is_line_char(self, value: str) -> None:
+        """Unicode vertical characters should be recognized as line chars."""
+        char = Character(value=value)
+
+        assert char.is_line_char() is True
+
+
+class TestUnicodeCornerCharacters:
+    """Tests for Unicode corner character classification."""
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "┌",
+            "┐",
+            "└",
+            "┘",
+            "╔",
+            "╗",
+            "╚",
+            "╝",
+            "┏",
+            "┓",
+            "┗",
+            "┛",
+        ],
+    )
+    def test_unicode_corner_characters_classified_as_corner(self, value: str) -> None:
+        """Unicode corner characters should be classified as CORNER."""
+        char = Character(value=value)
+
+        assert char.char_class == CharacterClass.CORNER
+
+    @pytest.mark.parametrize("value", ["┌", "┐", "└", "┘"])
+    def test_unicode_corner_is_corner(self, value: str) -> None:
+        """Unicode corner characters should be recognized as corners."""
+        char = Character(value=value)
+
+        assert char.is_corner() is True
+
+
+class TestUnicodeJunctionCharacters:
+    """Tests for Unicode junction character classification."""
+
+    @pytest.mark.parametrize("value", ["┼", "├", "┤", "┬", "┴"])
+    def test_unicode_junction_characters_classified_as_junction(self, value: str) -> None:
+        """Unicode junction characters should be classified as JUNCTION."""
+        char = Character(value=value)
+
+        assert char.char_class == CharacterClass.JUNCTION
+
+    @pytest.mark.parametrize("value", ["┼", "├", "┤", "┬", "┴"])
+    def test_unicode_junction_is_junction(self, value: str) -> None:
+        """Unicode junction characters should be recognized as junctions."""
+        char = Character(value=value)
+
+        assert char.is_junction() is True
+
+
+class TestDiagonalCharacters:
+    """Tests for diagonal line character classification."""
+
+    @pytest.mark.parametrize("value", ["\\", "╲"])
+    def test_diagonal_down_characters_classified_as_diagonal_down(self, value: str) -> None:
+        """Diagonal down characters should be classified as DIAGONAL_DOWN."""
+        char = Character(value=value)
+
+        assert char.char_class == CharacterClass.DIAGONAL_DOWN
+
+    @pytest.mark.parametrize("value", ["/", "╱"])
+    def test_diagonal_up_characters_classified_as_diagonal_up(self, value: str) -> None:
+        """Diagonal up characters should be classified as DIAGONAL_UP."""
+        char = Character(value=value)
+
+        assert char.char_class == CharacterClass.DIAGONAL_UP

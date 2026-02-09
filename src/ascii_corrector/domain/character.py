@@ -4,15 +4,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ascii_corrector.domain.character_constants import (
+    ARROW_CHARS,
+    CORNER_CHARS,
+    DIAGONAL_DOWN,
+    DIAGONAL_UP,
+    HORIZONTAL_CHARS,
+    JUNCTION_CHARS,
+    VERTICAL_CHARS,
+    WHITESPACE_CHARS,
+)
 from ascii_corrector.domain.enums import CharacterClass
-
-# Character classification sets
-_HORIZONTAL_CHARS: frozenset[str] = frozenset({"-", "=", "_"})
-_VERTICAL_CHARS: frozenset[str] = frozenset({"|", "!"})
-_CORNER_CHARS: frozenset[str] = frozenset({"+", ".", "'", "`"})
-_JUNCTION_CHARS: frozenset[str] = frozenset({"*"})
-_ARROW_CHARS: frozenset[str] = frozenset({"<", ">", "^", "v", "V"})
-_WHITESPACE_CHARS: frozenset[str] = frozenset({" ", "\t"})
 
 
 def _classify_character(value: str) -> CharacterClass:
@@ -25,17 +27,21 @@ def _classify_character(value: str) -> CharacterClass:
     Returns:
         CharacterClass for the character.
     """
-    if value in _HORIZONTAL_CHARS:
+    if value in HORIZONTAL_CHARS:
         return CharacterClass.HORIZONTAL
-    if value in _VERTICAL_CHARS:
+    if value in VERTICAL_CHARS:
         return CharacterClass.VERTICAL
-    if value in _CORNER_CHARS:
-        return CharacterClass.CORNER
-    if value in _JUNCTION_CHARS:
+    if value in JUNCTION_CHARS:
         return CharacterClass.JUNCTION
-    if value in _ARROW_CHARS:
+    if value in CORNER_CHARS:
+        return CharacterClass.CORNER
+    if value in DIAGONAL_DOWN:
+        return CharacterClass.DIAGONAL_DOWN
+    if value in DIAGONAL_UP:
+        return CharacterClass.DIAGONAL_UP
+    if value in ARROW_CHARS:
         return CharacterClass.ARROW
-    if value in _WHITESPACE_CHARS:
+    if value in WHITESPACE_CHARS:
         return CharacterClass.WHITESPACE
     if value.isalnum():
         return CharacterClass.TEXT

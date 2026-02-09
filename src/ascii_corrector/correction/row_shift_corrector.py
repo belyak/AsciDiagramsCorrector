@@ -4,9 +4,7 @@ from collections import defaultdict
 
 from ascii_corrector.correction.protocols import ShiftCorrection
 from ascii_corrector.domain import Cell, Direction, Grid, Line, Position
-
-# Characters used for column alignment consensus (vertical structural chars)
-_STRUCTURAL_CHARS: frozenset[str] = frozenset({"|", "+", "!"})
+from ascii_corrector.domain.character_constants import CORNER_CHARS, VERTICAL_CHARS
 
 
 class RowShiftCorrector:
@@ -50,7 +48,7 @@ class RowShiftCorrector:
         for row in range(grid.height):
             for col in range(grid.width):
                 cell = grid.get_cell(Position(row=row, col=col))
-                if cell is not None and cell.character.value in _STRUCTURAL_CHARS:
+                if cell is not None and cell.character.value in (VERTICAL_CHARS | CORNER_CHARS):
                     col_counts[col] += 1
                     structural_positions.add((row, col))
 

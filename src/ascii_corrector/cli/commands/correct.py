@@ -20,8 +20,6 @@ def correct(
     input_file: Optional[Path] = typer.Argument(
         None,
         help="Input ASCII diagram file",
-        exists=True,
-        readable=True,
     ),
     output_file: Optional[Path] = typer.Option(
         None,

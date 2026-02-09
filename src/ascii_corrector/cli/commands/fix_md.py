@@ -24,8 +24,6 @@ def fix_md(
     input_files: list[Path] = typer.Argument(
         ...,
         help="Markdown files to process",
-        exists=True,
-        readable=True,
     ),
     no_backup: bool = typer.Option(
         False,

@@ -47,6 +47,10 @@ class Settings(BaseSettings):
         default=True,
         description="Adjust corners/junctions when shifting lines",
     )
+    preserve_trees: bool = Field(
+        default=True,
+        description="Preserve tree branch notation, skip corrections on detected tree structures",
+    )
     dry_run: bool = Field(
         default=False,
         description="Analyze without applying corrections",

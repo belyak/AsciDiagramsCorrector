@@ -20,8 +20,6 @@ def analyze(
     input_file: Optional[Path] = typer.Argument(
         None,
         help="Input ASCII diagram file",
-        exists=True,
-        readable=True,
     ),
     show_lines: bool = typer.Option(
         False,

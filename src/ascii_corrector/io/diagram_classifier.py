@@ -1,16 +1,11 @@
 """Classifier to determine if text content is an ASCII diagram."""
 
-from ascii_corrector.domain.character import (
-    _ARROW_CHARS,
-    _CORNER_CHARS,
-    _HORIZONTAL_CHARS,
-    _JUNCTION_CHARS,
-    _VERTICAL_CHARS,
+from ascii_corrector.domain.character_constants import (
+    ALL_LINE_CHARS,
+    ARROW_CHARS,
 )
 
-_DIAGRAM_CHARS: frozenset[str] = (
-    _HORIZONTAL_CHARS | _VERTICAL_CHARS | _CORNER_CHARS | _JUNCTION_CHARS | _ARROW_CHARS
-)
+_DIAGRAM_CHARS: frozenset[str] = ALL_LINE_CHARS | ARROW_CHARS
 
 
 class DiagramClassifier:

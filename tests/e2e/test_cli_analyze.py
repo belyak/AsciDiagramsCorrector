@@ -56,7 +56,7 @@ class TestAnalyzeCommandOptions:
         content = "+----+\n|    |\n|    |\n+----+"
         input_file = temp_diagram_file(content)
 
-        result = runner.invoke(app, ["analyze", str(input_file), "--lines"])
+        result = runner.invoke(app, ["analyze", "--lines", str(input_file)])
 
         assert result.exit_code == 0
         assert "Detected Lines" in result.stdout
@@ -66,7 +66,7 @@ class TestAnalyzeCommandOptions:
         content = "+----+\n|    |\n|    |\n+----+"
         input_file = temp_diagram_file(content)
 
-        result = runner.invoke(app, ["analyze", str(input_file), "--parallel"])
+        result = runner.invoke(app, ["analyze", "--parallel", str(input_file)])
 
         assert result.exit_code == 0
         assert "Parallel Line Groups" in result.stdout
@@ -76,7 +76,7 @@ class TestAnalyzeCommandOptions:
         content = "+--+\n|  |\n+--+"
         input_file = temp_diagram_file(content)
 
-        result = runner.invoke(app, ["analyze", str(input_file), "--no-issues"])
+        result = runner.invoke(app, ["analyze", "--no-issues", str(input_file)])
 
         assert result.exit_code == 0
         # Should not show issues section
@@ -88,7 +88,7 @@ class TestAnalyzeCommandOptions:
         input_file = temp_diagram_file(content)
 
         result = runner.invoke(
-            app, ["analyze", str(input_file), "--tolerance", "2"]
+            app, ["analyze", "--tolerance", "2", str(input_file)]
         )
 
         assert result.exit_code == 0
@@ -98,7 +98,7 @@ class TestAnalyzeCommandOptions:
         content = "+----+\n|    |\n|    |\n+----+"
         input_file = temp_diagram_file(content)
 
-        result = runner.invoke(app, ["analyze", str(input_file), "-l", "-p", "-t", "1"])
+        result = runner.invoke(app, ["analyze", "-l", "-p", "-t", "1", str(input_file)])
 
         assert result.exit_code == 0
         assert "Detected Lines" in result.stdout
