@@ -155,6 +155,99 @@
 ```
 
 
+    SUPPORTED DIAGRAM TYPES
+    -----------------------
+
+    The tool handles a wide variety of ASCII diagram patterns with robust
+    detection and correction for edge cases:
+
+
+    Unicode Box-Drawing Characters
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Full support for Unicode box-drawing characters alongside ASCII.
+
+    Examples:
+    - Light boxes:   ┌─┐ │ └─┘
+    - Heavy boxes:   ┏━┓ ┃ ┗━┛
+    - Double boxes:  ╔═╗ ║ ╚═╝
+    - Junctions:     ├─┤ ┬ ┬ ┴ ┴ ┼
+
+    The tool preserves Unicode characters during correction and correctly
+    aligns diagrams using Unicode box elements.
+
+    Example:
+    ```
+    ┌──────────┐
+    │  Device  │
+     └─────────┘  <- misaligned, will be corrected
+    ```
+
+
+    Large Box Detection
+    ~~~~~~~~~~~~~~~~~~~
+
+    Correctly handles boxes where top and bottom edges are far apart
+    (more than the tolerance threshold).
+
+    Traditional parallel line detection groups lines by proximity. Large
+    boxes explicitly detect complete rectangular structures and align
+    all four edges as a unit.
+
+    Example:
+    ```
+    +----------+
+    |          |
+    |          |
+    |          |
+    |          |
+     +--------+  <- misaligned, corrected as box unit
+    ```
+
+
+    Tree Structure Preservation
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Detects and preserves tree branch notation without applying unwanted
+    corrections.
+
+    Tree branches (e.g., "+--", "├──") are correctly identified and not
+    misclassified as diagram anomalies. The tool skips correction on
+    detected tree structures when preserve_trees setting is enabled.
+
+    Example:
+    ```
+    root
+     |
+     +-- child1
+     +-- child2
+          |
+          +-- grandchild
+    ```
+
+    The tool preserves this structure without "correcting" branches.
+
+
+    Diagonal Line Support
+    ~~~~~~~~~~~~~~~~~~~~~
+
+    Diagonal connections are fully supported and corrected if misaligned.
+
+    Supported characters:
+    - ASCII: / (up), \ (down)
+    - Unicode: ╱ (up), ╲ (down)
+
+    Example:
+    ```
+    A
+     \
+      \
+       B
+    ```
+
+    Diagonal lines are detected, grouped, and corrected for alignment.
+
+
     CONFIGURATION
     -------------
 
